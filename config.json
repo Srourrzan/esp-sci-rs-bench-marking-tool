@@ -1,1 +1,5 @@
-#should I add the timestamp index in a json file or env file?
+{
+	"baud_rate": 921600,
+	"output_csv_file": "csi_latency_data.csv",
+	"ntp_server": "pool.ntp.org"
+}
