@@ -1,24 +1,12 @@
 from csv import reader;
+from time import time_ns;
 from sys import exit, stderr;
 from typing import List, Dict;
-from json import load, JSONDecodeError;
 from serial import Serial, SerialException;
-from time import perf_counter, time_ns, sleep;
 from statistics import median, quantiles, stdev;
 
-from serial_port import find_port, init_serial;
-
-def load_config() -> (int, Dict|None):
-	try:
-		with open("config.json", "r", encoding="utf-8") as file:
-			config: Dict = load(file)
-	except JSONDecodeError as e:
-		print(f"Failed to decode JSON: {e}", file=stderr)
-		return (-1, None);
-	except FileNotFoundError as e:
-		print(f"Config.json file was not found: {e}", file=stderr)
-		return (-1, None);
-	return (0, config);
+from utils import validate_sys;
+from serial_port import init_serial;
 
 def now_epoch_us() -> int:
 	"""
@@ -32,24 +20,6 @@ def print_stats(deltas: List) -> None:
 	print(f" Median latency:	{median(deltas):.0f} micro second")
 	print(f" Std dev: 				{stdev(deltas):.0f} micro second")
 	print(f" Min / Max: 			{min(deltas)} / {max(deltas)} micro seconds")
-
-def validate_sys() -> (int, str|None, Dict|None):
-	"""
-	Docstring for validate_sys
-	
-	:return: Description
-	:rtype: Any
-	"""
-	usb_port: str
-	configs: Dict
-
-	status, usb_port = find_port()
-	if (status < 0):
-		return (-1, None, None);
-	status, configs = load_config()
-	if (status < 0):
-		return (-1, None, None);
-	return (0, usb_port, configs);
 
 def main() -> int:
 	"""
@@ -94,7 +64,7 @@ def main() -> int:
 				except (ValueError, IndexError) as e:
 					print(f"Parse error: {e} | line: {line[:120]}")
 					continue
-				delta_us: int = host_rx_epoch_us - esp_epoch_us #vaive latency
+				delta_us: int = host_rx_epoch_us - esp_epoch_us
 				deltas.append(delta_us)
 				if len(deltas) % 500 == 0:
 					med = median(deltas)
