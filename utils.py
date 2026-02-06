@@ -42,7 +42,7 @@ def validate_sys() -> (int, str|None, Dict|None):
 	configs: Dict
 
 	if not check_ntp_sync():
-		return (-2, None, None);
+		return (-1, None, None);
 	status, usb_port = find_port()
 	if (status < 0):
 		return (-1, None, None);
